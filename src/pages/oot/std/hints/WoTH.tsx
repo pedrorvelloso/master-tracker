@@ -1,17 +1,16 @@
-import { useMemo } from 'react';
 import {
   Box,
-  Input,
   Modal,
   ModalContent,
   ModalOverlay,
   useDisclosure,
 } from '@chakra-ui/react';
 
-import fuzzysearch from 'utils/fuzzysearch';
 import useFuseState from 'hooks/useFuseState';
 
 import Hints from 'components/Hints';
+import Autocomplete from 'components/Autocomplete';
+
 import { useOcarinaHints } from '../std';
 
 function WayOfTheHero() {
@@ -19,16 +18,6 @@ function WayOfTheHero() {
   const { locations } = useOcarinaHints();
 
   const [searchLocation, setSearchLocation] = useFuseState<OOT.Location>();
-
-  const fuzzyLocation = useMemo(() => fuzzysearch(locations, ['name']), [
-    locations,
-  ]);
-
-  const handleLocationSearch = (locationName: string) => {
-    const search = fuzzyLocation.search(locationName);
-
-    setSearchLocation(search);
-  };
 
   return (
     <>
@@ -38,7 +27,11 @@ function WayOfTheHero() {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <Input onChange={(e) => handleLocationSearch(e.target.value)} />
+          <Autocomplete
+            items={locations}
+            searchKeys={['name']}
+            onSearch={(result) => setSearchLocation(result)}
+          />
           <Box height="120px" overflow="auto">
             {searchLocation?.map((location) => (
               <p key={location.item.name}>{location.item.name}</p>
