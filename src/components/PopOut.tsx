@@ -1,16 +1,25 @@
 import ReactDOM from 'react-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
 import copyStyles from 'utils/copystyles';
 
 interface PopOutProps {
   onClose: () => void;
   isOpen: boolean;
+  width?: number;
+  height?: number;
+  top?: number;
+  left?: number;
 }
 
 function PopOut({
   children,
   onClose,
   isOpen,
+  width = 600,
+  height = 400,
+  left = 0,
+  top = 0,
 }: React.PropsWithChildren<PopOutProps>) {
   const containerEl = document.createElement('div');
   const externalWindow = useRef<Window | null>();
@@ -20,7 +29,7 @@ function PopOut({
       externalWindow.current = window.open(
         '',
         '',
-        'width=600,height=400,left=200,top=200',
+        `width=${width},height=${height},left=${left},top=${top}`,
       );
 
       if (externalWindow.current?.document)
@@ -34,7 +43,7 @@ function PopOut({
     return () => {
       externalWindow.current?.close();
     };
-  }, [containerEl, isOpen, onClose]);
+  }, [containerEl, height, isOpen, left, onClose, top, width]);
 
   return isOpen ? ReactDOM.createPortal(children, containerEl) : null;
 }
@@ -44,9 +53,8 @@ export function usePopOut(defaultIsOpen?: boolean) {
 
   const onOpen = useCallback(() => setIsOpen(true), []);
   const onClose = useCallback(() => setIsOpen(false), []);
-  const onToggle = useCallback(() => setIsOpen((prevOpen) => !prevOpen), []);
 
-  return { isOpen, onOpen, onClose, onToggle };
+  return { isOpen, onOpen, onClose };
 }
 
 export default PopOut;
